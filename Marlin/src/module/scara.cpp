@@ -144,10 +144,10 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
     else {
       // MP_SCARA uses arm angles for AB home position
       #ifndef SCARA_OFFSET_THETA1
-        #define SCARA_OFFSET_THETA1  12 // degrees
+        //#define SCARA_OFFSET_THETA1  12 // degrees
       #endif
       #ifndef SCARA_OFFSET_THETA2
-        #define SCARA_OFFSET_THETA2 131 // degrees
+        //#define SCARA_OFFSET_THETA2 131 // degrees
       #endif
       ab_float_t homeposition = { SCARA_OFFSET_THETA1, SCARA_OFFSET_THETA2 };
       //DEBUG_ECHOLNPAIR("homeposition A:", homeposition.a, " B:", homeposition.b);
