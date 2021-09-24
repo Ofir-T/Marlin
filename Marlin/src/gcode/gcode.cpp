@@ -755,11 +755,11 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(MORGAN_SCARA)
-        case 360: if (M360()) return; break;                      // M360: SCARA Theta pos1
-        case 361: if (M361()) return; break;                      // M361: SCARA Theta pos2
-        case 362: if (M362()) return; break;                      // M362: SCARA Psi pos1
-        case 363: if (M363()) return; break;                      // M363: SCARA Psi pos2
-        case 364: if (M364()) return; break;                      // M364: SCARA Psi pos3 (90 deg to Theta)
+        case 360: if (M360()) return; break;                      // M360: Morgan SCARA Theta pos1
+        case 361: if (M361()) return; break;                      // M361: Morgan SCARA Theta pos2
+        case 362: if (M362()) return; break;                      // M362: Morgan SCARA Psi pos1
+        case 363: if (M363()) return; break;                      // M363: Morgan SCARA Psi pos2
+        case 364: if (M364()) return; break;                      // M364: Morgan SCARA Psi pos3 (90 deg to Theta)
       #endif
 
       #if EITHER(EXT_SOLENOID, MANUAL_SOLENOID_CONTROL)

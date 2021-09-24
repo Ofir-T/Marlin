@@ -24,6 +24,9 @@
  * scara.cpp
  */
 
+#define DEBUG_OUT
+#include "../core/DEBUG_OUT.h"
+
 #include "../inc/MarlinConfig.h"
 
 #if IS_SCARA
@@ -144,19 +147,20 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
     else {
       // MP_SCARA uses arm angles for AB home position
       #ifndef SCARA_OFFSET_THETA1
-        //#define SCARA_OFFSET_THETA1  12 // degrees
+        #define SCARA_OFFSET_THETA1  0 // degrees
       #endif
       #ifndef SCARA_OFFSET_THETA2
-        //#define SCARA_OFFSET_THETA2 131 // degrees
+        #define SCARA_OFFSET_THETA2 0 // degrees
       #endif
       ab_float_t homeposition = { SCARA_OFFSET_THETA1, SCARA_OFFSET_THETA2 };
-      //DEBUG_ECHOLNPAIR("homeposition A:", homeposition.a, " B:", homeposition.b);
+
+      DEBUG_ECHOLNPAIR("homeposition A:", homeposition.a, " B:", homeposition.b);
 
       inverse_kinematics(homeposition);
       forward_kinematics(delta.a, delta.b);
       current_position[axis] = cartes[axis];
 
-      //DEBUG_ECHOLNPAIR_P(PSTR("Cartesian X"), current_position.x, SP_Y_LBL, current_position.y);
+      DEBUG_ECHOLNPAIR_P(PSTR("Cartesian X"), current_position.x, SP_Y_LBL, current_position.y);
       update_software_endstops(axis);
     }
   }
@@ -169,7 +173,7 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
 
     delta.set(DEGREES(THETA1), DEGREES(THETA2), raw.z);
 
-    /*
+    
       DEBUG_POS("SCARA IK", raw);
       DEBUG_POS("SCARA IK", delta);
       SERIAL_ECHOLNPAIR("  SCARA (x,y) ", x, ",", y," Theta1=", THETA1, " Theta2=", THETA2);

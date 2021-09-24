@@ -283,6 +283,7 @@
  * M951 - Set Magnetic Parking Extruder parameters. (Requires MAGNETIC_PARKING_EXTRUDER)
  * M7219 - Control Max7219 Matrix LEDs. (Requires MAX7219_GCODE)
  *
+ * (Only Morgan SCARA for now)
  * M360 - SCARA calibration: Move to cal-position ThetaA (0 deg calibration)
  * M361 - SCARA calibration: Move to cal-position ThetaB (90 deg calibration - steps per degree)
  * M362 - SCARA calibration: Move to cal-position PsiA (0 deg calibration)
