@@ -205,8 +205,8 @@
  *
  * Cartesian/SCARA parameters
  *
- *  X   Home to the X endstop
- *  Y   Home to the Y endstop
+ *  X   Home to the X endstop -> A Axis? @OfirT
+ *  Y   Home to the Y endstop -> B axis? @OfirT
  *  Z   Home to the Z endstop
  */
 void GcodeSuite::G28() {
@@ -402,7 +402,9 @@ void GcodeSuite::G28() {
         idex_set_parked();
 
       #else
-
+        #if (ENABLED(MP_SCARA) && DISABLED(HOME_Y_BEFORE_X))
+          DISABLE_AXIS_Y(); // Allow elbow to be dragged around freely during shoulder homing
+        #endif
         homeaxis(X_AXIS);
 
       #endif

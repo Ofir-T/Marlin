@@ -209,7 +209,7 @@ typedef struct SettingsDataStruct {
   xyze_float_t planner_max_jerk;                        // M205 XYZE  planner.max_jerk
   float planner_junction_deviation_mm;                  // M205 J     planner.junction_deviation_mm
 
-  xyz_pos_t home_offset;                                // M206 XYZ / M665 TPZ
+  xyz_pos_t home_offset;                                // M206 XYZ / M665 TPXYZ
 
   #if HAS_HOTEND_OFFSET
     xyz_pos_t hotend_offset[HOTENDS - 1];               // M218 XYZ
@@ -683,6 +683,7 @@ void MarlinSettings::postprocess() {
 
       #if HAS_SCARA_OFFSET
         EEPROM_WRITE(scara_home_offset);
+        EEPROM_WRITE(scara_tower_offset);
       #else
         #if !HAS_HOME_OFFSET
           const xyz_pos_t home_offset{0};
@@ -1525,6 +1526,7 @@ void MarlinSettings::postprocess() {
 
         #if HAS_SCARA_OFFSET
           EEPROM_READ(scara_home_offset);
+          EEPROM_READ(scara_tower_offset);
         #else
           #if !HAS_HOME_OFFSET
             xyz_pos_t home_offset;
@@ -2561,6 +2563,8 @@ void MarlinSettings::reset() {
 
   #if HAS_SCARA_OFFSET
     scara_home_offset.reset();
+    scara_tower_offset.reset();
+    
   #elif HAS_HOME_OFFSET
     home_offset.reset();
   #endif
@@ -3314,13 +3318,15 @@ void MarlinSettings::reset() {
 
     #if HAS_SCARA_OFFSET
 
-      CONFIG_ECHO_HEADING("SCARA settings: S<seg-per-sec> P<theta-psi-offset> T<theta-offset>");
+      CONFIG_ECHO_HEADING("SCARA settings: S<seg-per-sec> P<theta-psi-offset> T<theta-offset> X<tower-offset> Y<tower-offset>");
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR_P(
           PSTR("  M665 S"), segments_per_second
         , SP_P_STR, scara_home_offset.a
         , SP_T_STR, scara_home_offset.b
         , SP_Z_STR, LINEAR_UNIT(scara_home_offset.z)
+        , SP_X_STR, LINEAR_UNIT(scara_tower_offset.x)
+        , SP_X_STR, LINEAR_UNIT(scara_tower_offset.y)
       );
 
     #elif ENABLED(DELTA)

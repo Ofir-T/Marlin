@@ -44,7 +44,7 @@ void M206_report() {
 }
 
 /**
- * M206: Set Additional Homing Offset (X Y Z). SCARA aliases T=X, P=Y
+ * M206: Set Additional Homing Offset (X Y Z). Morgan SCARA aliases T=X, P=Y
  *
  * *** @thinkyhead: I recommend deprecating M206 for SCARA in favor of M665.
  * ***              M206 for SCARA will remain enabled in 1.1.x for compatibility.

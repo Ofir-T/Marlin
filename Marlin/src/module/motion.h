@@ -496,6 +496,7 @@ void home_if_needed(const bool keeplev=false);
 
   #if HAS_SCARA_OFFSET
     extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
+    extern xy_pos_t scara_tower_offset; // SCARA tower offset: Origin (X=0,Y=0) offset from Shoulder Axis. Offsets the entire workspace  
   #endif
 
   // Return true if the given point is within the printable area

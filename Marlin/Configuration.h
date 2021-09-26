@@ -71,7 +71,7 @@
  *   https://www.thingiverse.com/thing:2487048
  *   https://www.thingiverse.com/thing:1241491
  */
-#define MP_SCARA
+#define MP_SCARA // Serial SCARA Arm
 
 #if EITHER(MORGAN_SCARA, MP_SCARA)
   // If movement is choppy try lowering this value
@@ -83,8 +83,8 @@
 
   // SCARA tower offset (position of Tower relative to bed zero position)
   // This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
-  #define SCARA_OFFSET_X    0       // (mm)
-  #define SCARA_OFFSET_Y    61       // (mm)
+  #define SCARA_OFFSET_X    61 //61?      // (mm)
+  #define SCARA_OFFSET_Y    0 //61?       // (mm)
 
   #if ENABLED(MORGAN_SCARA)
 
@@ -92,15 +92,67 @@
     #define SCARA_FEEDRATE_SCALING  // Convert XY feedrate from mm/s to degrees/s on the fly
 
     // Radius around the center where the arm cannot reach
-    #define MIDDLE_DEAD_ZONE_R   76  // (mm)
+    #define MIDDLE_DEAD_ZONE_R   0  // (mm)
 
     #define THETA_HOMING_OFFSET  0  // Calculated from Calibration Guide and M360 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
     #define PSI_HOMING_OFFSET    0  // Calculated from Calibration Guide and M364 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
 s
   #elif ENABLED(MP_SCARA)
+/** @OfirT
+ * SCARA offsets { T1, T2 }, { X, Y }
+ *
+ * X and Y offset
+ *   Measure the distance from the tip of
+ *   the Nozzle to the center-point of the A axis (shoulder).
+ * 
+ * T1 and T2 offset
+ *   t
+ *   t
+ *
+ * Tune and Adjust
+ * -  SCARA Offsets can be tuned at runtime with 'M665', LCD menus, babystepping, etc.
+ *
+ * Assuming the typical work area orientation:
+ *  - Probe to RIGHT of the Nozzle has a Positive X offset
+ *  - Probe to LEFT  of the Nozzle has a Negative X offset
+ *  - Probe in BACK  of the Nozzle has a Positive Y offset
+ *  - Probe in FRONT of the Nozzle has a Negative Y offset
+ *
+ * Some examples:
+ *   #define SCARA_OFFSET_X  0  // Example "A1"
+ *   #define SCARA_OFFSET_Y  0
+ *   #define SCARA_OFFSET_X  0  // Example "A2"
+ *   #define SCARA_OFFSET_Y  0
+ *   #define SCARA_OFFSET_X  0  // Example "A3"
+ *   #define SCARA_OFFSET_Y  0
+ *   #define SCARA_OFFSET_X  0  // Example "A4"
+ *   #define SCARA_OFFSET_Y  0
+ *
+ * Above View:
+ *  A Axis is the shoulder axis (A⊥X,Y)
+ *  B Axis is the elbow axis (B⊥X,Y)
+ *  Theta1 = ∠YA , Theta2 = ∠AB
+ * 
+ *            X Axis
+ *              ^
+ *              |
+ *     +-----------------+
+ *     |                 |
+ *     |        ^        | 
+ *     |        |        | 
+ *     |        A1-->    | ---> Y Axis 
+ *     |                 | 
+ *     |   A4   A2   A3  | 
+ *     |                 |
+ *     +-----------------+
+ */
 
-    #define SCARA_OFFSET_THETA1  0 // degrees
-    #define SCARA_OFFSET_THETA2 0 // degrees
+    #define DEBUG_SCARA_KINEMATICS
+    //#define SCARA_RIGHT_HANDED // Uncomment if your SCARA is right handed (elbow joint is always to the right of the shoulder joint)
+    #define SCARA_OFFSET_THETA1  2 // degrees, 2 for debugging
+    #define SCARA_OFFSET_THETA2 2 // degrees, 2 for debugging
+    //#define THETA1_MOTION_RANGE 180 //degrees, in construction
+    //#define THETA2_MOTION_RANGE 180 //degrees, in construction
 
   #endif
 
@@ -111,8 +163,8 @@ s
 // @section info
 
 // Author info of this build printed to the host during boot and M115
-#define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
-//#define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
+#define STRING_CONFIG_H_AUTHOR "(Ofir Temelman, Experimental Scara)" // Who made the changes.
+#define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
 
 /**
  * *** VENDORS PLEASE READ ***
@@ -192,7 +244,7 @@ s
 //#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
 
 /**
- * Define the number of coordinated linear axes.
+ * Define the number of coordinated linear axes. //@OfirT: what about SCARA? 
  * See https://github.com/DerAndere1/Marlin/wiki
  * Each linear axis gets its own stepper control and endstop:
  *
@@ -809,14 +861,14 @@ s
 // Specify here all the endstop connectors that are connected to any endstop or probe.
 // Almost all printers will be using one per axis. Probes will use one or more of the
 // extra connectors. Leave undefined any used for non-endstop and non-probe purposes.
-//#define USE_XMIN_PLUG
+#define USE_XMIN_PLUG
 //#define USE_YMIN_PLUG
-//#define USE_ZMIN_PLUG
+#define USE_ZMIN_PLUG
 //#define USE_IMIN_PLUG
 //#define USE_JMIN_PLUG
 //#define USE_KMIN_PLUG
 //#define USE_XMAX_PLUG
-//#define USE_YMAX_PLUG
+#define USE_YMAX_PLUG
 //#define USE_ZMAX_PLUG
 //#define USE_IMAX_PLUG
 //#define USE_JMAX_PLUG
@@ -1354,7 +1406,7 @@ s
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR true
+#define INVERT_Y_DIR false //
 #define INVERT_Z_DIR false
 //#define INVERT_I_DIR false
 //#define INVERT_J_DIR false
@@ -1755,9 +1807,9 @@ s
 
 // Manually set the home position. Leave these undefined for automatic settings.
 // For DELTA this is the top-center of the Cartesian print volume.
-//#define MANUAL_X_HOME_POS 0
-//#define MANUAL_Y_HOME_POS 0
-//#define MANUAL_Z_HOME_POS 0
+#define MANUAL_X_HOME_POS 0 // -61
+#define MANUAL_Y_HOME_POS 188 // 188
+#define MANUAL_Z_HOME_POS 0
 //#define MANUAL_I_HOME_POS 0
 //#define MANUAL_J_HOME_POS 0
 //#define MANUAL_K_HOME_POS 0

@@ -82,24 +82,28 @@
 
       if (parser.seenval('Z')) scara_home_offset.z = parser.value_linear_units();
 
-      const bool hasA = parser.seenval('A'), hasP = parser.seenval('P'), hasX = parser.seenval('X');
-      const uint8_t sumAPX = hasA + hasP + hasX;
-      if (sumAPX) {
-        if (sumAPX == 1)
+      if (parser.seenval('X')) scara_tower_offset.y = parser.value_linear_units();
+
+      if (parser.seenval('Y')) scara_tower_offset.y = parser.value_linear_units();
+
+      const bool hasA = parser.seenval('A'), hasP = parser.seenval('P');
+      const uint8_t sumAP = hasA + hasP;
+      if (sumAP) {
+        if (sumAP == 1)
           scara_home_offset.a = parser.value_float();
         else {
-          SERIAL_ERROR_MSG("Only one of A, P, or X is allowed.");
+          SERIAL_ERROR_MSG("Only one of A or P is allowed.");
           return;
         }
       }
 
-      const bool hasB = parser.seenval('B'), hasT = parser.seenval('T'), hasY = parser.seenval('Y');
-      const uint8_t sumBTY = hasB + hasT + hasY;
-      if (sumBTY) {
-        if (sumBTY == 1)
+      const bool hasB = parser.seenval('B'), hasT = parser.seenval('T');
+      const uint8_t sumBT = hasB + hasT;
+      if (sumBT) {
+        if (sumBT == 1)
           scara_home_offset.b = parser.value_float();
         else {
-          SERIAL_ERROR_MSG("Only one of B, T, or Y is allowed.");
+          SERIAL_ERROR_MSG("Only one of B or T is allowed.");
           return;
         }
       }

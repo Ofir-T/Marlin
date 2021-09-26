@@ -24,9 +24,6 @@
  * scara.cpp
  */
 
-#define DEBUG_OUT
-#include "../core/DEBUG_OUT.h"
-
 #include "../inc/MarlinConfig.h"
 
 #if IS_SCARA
@@ -34,11 +31,15 @@
 #include "scara.h"
 #include "motion.h"
 #include "planner.h"
+#include "../MarlinCore.h" // for homing which isn't supposed to work now (?)
 
 #if ENABLED(AXEL_TPARA)
   #include "endstops.h"
   #include "../MarlinCore.h"
 #endif
+
+#define DEBUG_OUT ENABLED(DEBUG_SCARA_KINEMATICS)
+#include "../core/debug_out.h"
 
 float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SEGMENTS_PER_SECOND);
 
@@ -60,7 +61,7 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
     cartes.x = a_cos + b_cos + scara_offset.x;  // theta
     cartes.y = a_sin + b_sin + scara_offset.y;  // phi
 
-    /*
+    
       DEBUG_ECHOLNPAIR(
         "SCARA FK Angle a=", a,
         " b=", b,
@@ -69,7 +70,7 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
         " b_sin=", b_sin,
         " b_cos=", b_cos
       );
-      DEBUG_ECHOLNPAIR(" cartes (X,Y) = "(cartes.x, ", ", cartes.y, ")");
+      DEBUG_ECHOLNPAIR(" cartes (X,Y) = (", cartes.x, ", ", cartes.y, ")");
     //*/
   }
 
@@ -141,6 +142,14 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
 
 #elif ENABLED(MP_SCARA)
 
+  /*
+   // MP_SCARA debugging function - in construction 
+    #define DELTA_DEBUG(VAR) do { \
+     SERIAL_ECHOLNPAIR_P(PSTR("Cartesian X"), VAR.x, SP_Y_STR, VAR.y, SP_Z_STR, VAR.z); \
+     SERIAL_ECHOLNPAIR_P(PSTR("Delta A"), delta.a, SP_B_STR, delta.b, SP_C_STR, delta.c); \
+    }while(0)
+  */
+
   void scara_set_axis_is_at_home(const AxisEnum axis) {
     if (axis == Z_AXIS)
       current_position.z = Z_HOME_POS;
@@ -165,13 +174,25 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
     }
   }
 
-  void inverse_kinematics(const xyz_pos_t &raw) {
-    const float x = raw.x, y = raw.y, c = HYPOT(x, y),
-                THETA3 = ATAN2(y, x),
-                THETA1 = THETA3 + ACOS((sq(c) + sq(L1) - sq(L2)) / (2.0f * c * L1)),
-                THETA2 = THETA3 - ACOS((sq(c) + sq(L2) - sq(L1)) / (2.0f * c * L2));
+  /**
+   * MP_SCARA Inverse Kinematics. Results are stored in 'delta'.
+   * 
+   */
 
-    delta.set(DEGREES(THETA1), DEGREES(THETA2), raw.z);
+  void inverse_kinematics(const xyz_pos_t &raw) {
+    #if ENABLED(SCARA_RIGHT_HANDED) //Handles "handedness" of robot
+      const float x = raw.x, y = raw.y, c = HYPOT(x, y),
+                  THETA3 = ATAN2(y, x),
+                  THETA1 = THETA3 - ACOS((sq(c) + sq(L1) - sq(L2)) / (2.0f * c * L1)), // ...THETA3 - ACOS...
+                  THETA2 = THETA3 + ACOS((sq(c) + sq(L2) - sq(L1)) / (2.0f * c * L2)); //...THETA3 + ACOS...
+    #else
+      const float x = raw.x, y = raw.y, c = HYPOT(x, y),
+                  THETA3 = ATAN2(y, x),
+                  THETA1 = THETA3 + ACOS((sq(c) + sq(L1) - sq(L2)) / (2.0f * c * L1)),
+                  THETA2 = THETA3 - ACOS((sq(c) + sq(L2) - sq(L1)) / (2.0f * c * L2));
+    #endif
+
+      delta.set(DEGREES(THETA1), DEGREES(THETA2), raw.z);
 
     
       DEBUG_POS("SCARA IK", raw);

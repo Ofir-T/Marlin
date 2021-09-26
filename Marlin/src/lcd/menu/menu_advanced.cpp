@@ -558,6 +558,13 @@ void menu_advanced_settings() {
       ACTION_ITEM(MSG_SET_HOME_OFFSETS, []{ queue.inject_P(PSTR("M428")); ui.return_to_status(); });
     #endif
 
+    // #if IS_SCARA
+    //   //
+    //   // Set Home Offsets for SSCARA
+    //   //
+    //   ACTION_ITEM(MSG_SET_HOME_OFFSETS, []{ queue.inject_P(PSTR("M665")); ui.return_to_status(); });
+    // #endif
+
     // M203 / M205 - Feedrate items
     SUBMENU(MSG_VELOCITY, menu_advanced_velocity);
 

@@ -212,7 +212,7 @@
  */
 #if IS_SCARA
   #undef SLOWDOWN
-  #if DISABLED(AXEL_TPARA)
+  #if (DISABLED(AXEL_TPARA) && DISABLED(MP_SCARA))
     #define QUICK_HOME
   #endif
   #define SCARA_PRINTABLE_RADIUS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
@@ -3515,7 +3515,7 @@
     #define HAS_WORKSPACE_OFFSET 1  // Cumulative offset to workspace to save some calculation
     #define HAS_M206_COMMAND 1      // M206 sets the home offset for Cartesian machines
   #elif IS_SCARA
-    #define HAS_SCARA_OFFSET 1      // The SCARA home offset applies only on G28
+    #define HAS_SCARA_OFFSET 1      // The SCARA home offset applies only on G28 // SCARA tower offset applies to all moves
   #endif
 #endif
 
