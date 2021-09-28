@@ -327,7 +327,7 @@ extern const char G28_STR[];
 class GcodeSuite {
 public:
 
-  static uint8_t axis_relative;
+  static axis_bits_t axis_relative;
 
   static inline bool axis_is_relative(const AxisEnum a) {
     #if HAS_EXTRUDERS
@@ -879,7 +879,7 @@ private:
 
   #if ENABLED(PIDTEMP)
     static void M301();
-    static void M301_report(const bool forReplay=true, const int8_t eindex=-1);
+    static void M301_report(const bool forReplay=true E_OPTARG(const int8_t eindex=-1));
   #endif
 
   #if ENABLED(PREVENT_COLD_EXTRUSION)
