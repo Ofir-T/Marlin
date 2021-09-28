@@ -37,11 +37,19 @@
   #include "../MarlinCore.h"
 #endif
 
+#define DEBUG_OUT ENABLED(DEBUG_SCARA_KINEMATICS)
+  #include "../core/debug_out.h"
+#endif
+
 float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SEGMENTS_PER_SECOND);
 
 #if EITHER(MORGAN_SCARA, MP_SCARA)
 
-  static constexpr xy_pos_t scara_offset = { SCARA_OFFSET_X, SCARA_OFFSET_Y };
+  #if ENABLED(DEBUG_SCARA_KINEMATICS)
+    xy_pos_t scara_pole_offset = { SCARA_OFFSET_X, SCARA_OFFSET_Y };
+  #else
+    static constexpr xy_pos_t scara_pole_offset = { SCARA_OFFSET_X, SCARA_OFFSET_Y };
+  #endif
 
   /**
    * Morgan SCARA Forward Kinematics. Results in 'cartes'.
@@ -54,10 +62,10 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
                 b_sin = sin(RADIANS(SUM_TERN(MP_SCARA, b, a))) * L2,
                 b_cos = cos(RADIANS(SUM_TERN(MP_SCARA, b, a))) * L2;
 
-    cartes.x = a_cos + b_cos + scara_offset.x;  // theta
-    cartes.y = a_sin + b_sin + scara_offset.y;  // phi
+    cartes.x = a_cos + b_cos + scara_pole_offset.x;  // theta
+    cartes.y = a_sin + b_sin + scara_pole_offset.y;  // phi
 
-    /*
+    
       DEBUG_ECHOLNPGM(
         "SCARA FK Angle a=", a,
         " b=", b,
@@ -103,7 +111,7 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
     float C2, S2, SK1, SK2, THETA, PSI;
 
     // Translate SCARA to standard XY with scaling factor
-    const xy_pos_t spos = raw - scara_offset;
+    const xy_pos_t spos = raw - scara_pole_offset;
 
     const float H2 = HYPOT2(spos.x, spos.y);
     if (L1 == L2)
@@ -150,13 +158,13 @@ float segments_per_second = TERN(AXEL_TPARA, TPARA_SEGMENTS_PER_SECOND, SCARA_SE
         #define SCARA_OFFSET_THETA2 131 // degrees
       #endif
       ab_float_t homeposition = { SCARA_OFFSET_THETA1, SCARA_OFFSET_THETA2 };
-      //DEBUG_ECHOLNPGM("homeposition A:", homeposition.a, " B:", homeposition.b);
+      DEBUG_ECHOLNPGM("homeposition A:", homeposition.a, " B:", homeposition.b);
 
       inverse_kinematics(homeposition);
       forward_kinematics(delta.a, delta.b);
       current_position[axis] = cartes[axis];
 
-      //DEBUG_ECHOLNPGM_P(PSTR("Cartesian X"), current_position.x, SP_Y_LBL, current_position.y);
+      DEBUG_ECHOLNPGM_P(PSTR("Cartesian X"), current_position.x, SP_Y_LBL, current_position.y);
       update_software_endstops(axis);
     }
   }

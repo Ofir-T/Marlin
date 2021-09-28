@@ -917,7 +917,7 @@ private:
     static void M360();
   #endif
 
-  #if ENABLED(MORGAN_SCARA)
+  #if ENABLED(MORGAN_SCARA, MP_SCARA)
     static bool M360();
     static bool M361();
     static bool M362();

@@ -58,13 +58,107 @@
  */
 
 //===========================================================================
-//========================== DELTA / SCARA / TPARA ==========================
-//===========================================================================
-//
-// Download configurations from the link above and customize for your machine.
-// Examples are located in config/examples/delta, .../SCARA, and .../TPARA.
-//
-//===========================================================================
+
+/**
+ * MORGAN_SCARA was developed by QHARLEY in South Africa in 2012-2013.
+ * Implemented and slightly reworked by JCERNY in June, 2014.
+ */
+//#define MORGAN_SCARA
+
+/**
+ * Mostly Printed SCARA is an open source design by Tyler Williams. See:
+ *   https://www.thingiverse.com/thing:2487048
+ *   https://www.thingiverse.com/thing:1241491
+ */
+#define MP_SCARA // Serial SCARA Arm
+
+#if EITHER(MORGAN_SCARA, MP_SCARA)
+  // If movement is choppy try lowering this value
+  #define SCARA_SEGMENTS_PER_SECOND 200
+
+  // Length of inner and outer support arms. Measure arm lengths precisely.
+  #define SCARA_LINKAGE_1  89.5    // (mm)
+  #define SCARA_LINKAGE_2 98.5    // (mm)
+
+  // SCARA tower offset (position of Tower relative to bed zero position)
+  // This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
+  #define SCARA_OFFSET_X    61 //61?      // (mm)
+  #define SCARA_OFFSET_Y    0 //61?       // (mm)
+
+  #if ENABLED(MORGAN_SCARA)
+
+    //#define DEBUG_SCARA_KINEMATICS
+    #define SCARA_FEEDRATE_SCALING  // Convert XY feedrate from mm/s to degrees/s on the fly
+
+    // Radius around the center where the arm cannot reach
+    #define MIDDLE_DEAD_ZONE_R   0  // (mm)
+
+    #define THETA_HOMING_OFFSET  0  // Calculated from Calibration Guide and M360 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
+    #define PSI_HOMING_OFFSET    0  // Calculated from Calibration Guide and M364 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
+s
+  #elif ENABLED(MP_SCARA)
+/** @OfirT
+ * SCARA offsets { T1, T2 }, { X, Y }
+ *
+ * X and Y offset
+ *   Measure the distance from the tip of
+ *   the Nozzle to the center-point of the A Pole (shoulder axis).
+ * 
+ * T1 and T2 offset
+ *   t
+ *   t
+ *
+ * Tune and Adjust
+ * -  SCARA Offsets can be tuned at runtime with 'M665', LCD menus, babystepping, etc.
+ *
+ * Assuming the typical work area orientation:
+ *  - Probe to RIGHT of the Nozzle has a Positive X offset
+ *  - Probe to LEFT  of the Nozzle has a Negative X offset
+ *  - Probe in BACK  of the Nozzle has a Positive Y offset
+ *  - Probe in FRONT of the Nozzle has a Negative Y offset
+ *
+ * Some examples:
+ *   #define SCARA_OFFSET_X  0  // Example "A1"
+ *   #define SCARA_OFFSET_Y  0
+ *   #define SCARA_OFFSET_X  0  // Example "A2"
+ *   #define SCARA_OFFSET_Y  0
+ *   #define SCARA_OFFSET_X  0  // Example "A3"
+ *   #define SCARA_OFFSET_Y  0
+ *   #define SCARA_OFFSET_X  0  // Example "A4"
+ *   #define SCARA_OFFSET_Y  0
+ *
+ * Above View:
+ *  A Axis is the shoulder axis (A⊥X,Y)
+ *  B Axis is the elbow axis (B⊥X,Y)
+ *  Theta1 = ∠YA , Theta2 = ∠AB
+ * 
+ *            X Axis
+ *              ^
+ *              |
+ *     +-----------------+
+ *     |                 |
+ *     |        ^        | 
+ *     |        |        | 
+ *     |        A1-->    | ---> Y Axis 
+ *     |                 | 
+ *     |   A4   A2   A3  | 
+ *     |                 |
+ *     +-----------------+
+ */
+
+    #define DEBUG_SCARA_KINEMATICS
+    //#define SCARA_RIGHT_HANDED // Uncomment if your SCARA is right handed (elbow joint is always to the right of the shoulder joint)
+    #define SCARA_OFFSET_THETA1  2 // degrees, 2 for debugging
+    #define SCARA_OFFSET_THETA2 2 // degrees, 2 for debugging
+    //#define THETA1_MOTION_RANGE 180 //degrees, in construction
+    //#define THETA2_MOTION_RANGE 180 //degrees, in construction
+    #define MIDDLE_DEAD_ZONE_R
+
+  #endif
+
+#endif
+
+//==================== END ==== SCARA Printer ==== END ======================
 
 // @section info
 
@@ -102,7 +196,7 @@
  *
  * :[-1, 0, 1, 2, 3, 4, 5, 6, 7]
  */
-#define SERIAL_PORT 0
+#define SERIAL_PORT 1
 
 /**
  * Serial Port Baud Rate
@@ -139,11 +233,11 @@
 
 // Choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_RAMPS_14_EFB
+  #define MOTHERBOARD BOARD_MKS_ROBIN_E3D_V1_1
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
-//#define CUSTOM_MACHINE_NAME "3D Printer"
+#define CUSTOM_MACHINE_NAME "SCARA Printer"
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -169,9 +263,9 @@
  * Axis codes for additional axes:
  * This defines the axis code that is used in G-code commands to
  * reference a specific axis.
- * 'A' for rotational axis parallel to X
+ * 'A' for rotational axis parallel to X //@OfirT: maybe change to I,J,K to avid confution with kinematic machines?
  * 'B' for rotational axis parallel to Y
- * 'C' for rotational axis parallel to Z
+ * 'C' for rotational axis parallel to Z 
  * 'U' for secondary linear axis parallel to X
  * 'V' for secondary linear axis parallel to Y
  * 'W' for secondary linear axis parallel to Z
@@ -556,7 +650,7 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 275
+#define HEATER_0_MAXTEMP 245
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -760,6 +854,8 @@
 
 // Enable for a belt style printer with endless "Z" motion
 //#define BELTPRINTER
+
+// Enable for SCARA Kinematics
 
 // Enable for Polargraph Kinematics
 //#define POLARGRAPH
@@ -974,7 +1070,7 @@
  * When changing speed and direction, if the difference is less than the
  * value set here, it may happen instantaneously.
  */
-//#define CLASSIC_JERK
+#define CLASSIC_JERK
 #if ENABLED(CLASSIC_JERK)
   #define DEFAULT_XJERK 10.0
   #define DEFAULT_YJERK 10.0
@@ -1322,7 +1418,7 @@
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR true
+#define INVERT_Y_DIR false
 #define INVERT_Z_DIR false
 //#define INVERT_I_DIR false
 //#define INVERT_J_DIR false
@@ -1360,7 +1456,7 @@
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
 #define X_HOME_DIR -1
-#define Y_HOME_DIR -1
+#define Y_HOME_DIR 1
 #define Z_HOME_DIR -1
 //#define I_HOME_DIR -1
 //#define J_HOME_DIR -1
@@ -1368,16 +1464,16 @@
 
 // @section machine
 
-// The size of the printable area
+// The size of the printable area //@OfirT: add an option for polar bed area? (min_rad, max_rad, angle motion range)
 #define X_BED_SIZE 200
 #define Y_BED_SIZE 200
 
-// Travel limits (mm) after homing, corresponding to endstop positions.
-#define X_MIN_POS 0
-#define Y_MIN_POS 0
+// Travel limits (mm) after homing, corresponding to endstop positions. //@OfirT: add polar restrictions
+#define X_MIN_POS -200
+#define Y_MIN_POS -200
 #define Z_MIN_POS 0
-#define X_MAX_POS X_BED_SIZE
-#define Y_MAX_POS Y_BED_SIZE
+#define X_MAX_POS X_BED_SIZE + 200
+#define Y_MAX_POS Y_BED_SIZE + 200
 #define Z_MAX_POS 200
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
@@ -1396,7 +1492,7 @@
  */
 
 // Min software endstops constrain movement within minimum coordinate bounds
-#define MIN_SOFTWARE_ENDSTOPS
+//#define MIN_SOFTWARE_ENDSTOPS
 #if ENABLED(MIN_SOFTWARE_ENDSTOPS)
   #define MIN_SOFTWARE_ENDSTOP_X
   #define MIN_SOFTWARE_ENDSTOP_Y
@@ -1407,7 +1503,7 @@
 #endif
 
 // Max software endstops constrain movement within maximum coordinate bounds
-#define MAX_SOFTWARE_ENDSTOPS
+//#define MAX_SOFTWARE_ENDSTOPS
 #if ENABLED(MAX_SOFTWARE_ENDSTOPS)
   #define MAX_SOFTWARE_ENDSTOP_X
   #define MAX_SOFTWARE_ENDSTOP_Y
@@ -1721,10 +1817,21 @@
 // The center of the bed is at (X=0, Y=0)
 //#define BED_CENTER_AT_0_0
 
-// Manually set the home position. Leave these undefined for automatic settings.
+//@OfirT:
+//Set home position coordinate system. Leave undefined for cartesian.
+//Enables seperating the machine cooridnate system from it's workspace coordinates system 
+//#define POLAR_HOME_POS
+
+// Manually set the home position. Leave these undefined for automatic settings. //@OfirT: manual home position in polar cooridantes/degrees
 // For DELTA this is the top-center of the Cartesian print volume.
-//#define MANUAL_X_HOME_POS 0
-//#define MANUAL_Y_HOME_POS 0
+#if ENABLED(POLAR_HOME_POS)
+  //#define MANUAL_A_HOME_POS 0
+  //#define MANUAL_B_HOME_POS 0
+  //#define MANUAL_C_HOME_POS 0
+#else
+  #define MANUAL_X_HOME_POS 0
+  #define MANUAL_Y_HOME_POS 0
+#endif
 //#define MANUAL_Z_HOME_POS 0
 //#define MANUAL_I_HOME_POS 0
 //#define MANUAL_J_HOME_POS 0
@@ -2095,14 +2202,14 @@
  * SD Card support is disabled by default. If your controller has an SD slot,
  * you must uncomment the following option or it won't work.
  */
-//#define SDSUPPORT
+#define SDSUPPORT
 
 /**
  * SD CARD: ENABLE CRC
  *
  * Use CRC checks and retries on the SD communication.
  */
-//#define SD_CHECK_AND_RETRY
+#define SD_CHECK_AND_RETRY
 
 /**
  * LCD Menu Items
@@ -2355,7 +2462,7 @@
 // RepRapDiscount FULL GRAPHIC Smart Controller
 // https://reprap.org/wiki/RepRapDiscount_Full_Graphic_Smart_Controller
 //
-//#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
+#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
 
 //
 // K.3D Full Graphic Smart Controller

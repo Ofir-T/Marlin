@@ -1713,6 +1713,7 @@ void Planner::finish_and_disable() {
 /**
  * Get an axis position according to stepper position(s)
  * For CORE machines apply translation from ABC to XYZ.
+ * For SCARA machine returns steps/degree (axis_steps*steps/unit)
  */
 float Planner::get_axis_position_mm(const AxisEnum axis) {
   float axis_steps;

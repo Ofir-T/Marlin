@@ -147,6 +147,7 @@ xyz_pos_t cartes;
 
   #if HAS_SCARA_OFFSET
     abc_pos_t scara_home_offset;
+    xy_pos_t scara_pole_offset;
   #endif
 
   #if HAS_SOFTWARE_ENDSTOPS

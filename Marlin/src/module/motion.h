@@ -496,6 +496,7 @@ void home_if_needed(const bool keeplev=false);
 
   #if HAS_SCARA_OFFSET
     extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
+    extern xy_pos_t scara_pole_offset; // SCARA pole offset: Offset the origin (X=0,Y=0) from Shoulder Axis (Pole). Offsets the entire workspace  
   #endif
 
   // Return true if the given point is within the printable area
@@ -522,7 +523,7 @@ void home_if_needed(const bool keeplev=false);
         #endif
       );
 
-    #elif IS_SCARA
+    #elif IS_SCARA //@OfirT:check compatibilyty for MP_SCARA
 
       const float R2 = HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y);
       return (
