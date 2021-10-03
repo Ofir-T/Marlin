@@ -531,6 +531,9 @@ void home_if_needed(const bool keeplev=false);
         #if MIDDLE_DEAD_ZONE_R > 0
           && R2 >= sq(float(MIDDLE_DEAD_ZONE_R))
         #endif
+        //#if BACK_DEADZONE_WIDTH > 0
+        //  && ((ry < 0) && ( sq(float(rx)) >= sq(float(BACK_DEADZONE_WIDTH))))
+        //#endif
       );
 
     #endif
@@ -539,6 +542,19 @@ void home_if_needed(const bool keeplev=false);
   inline bool position_is_reachable(const xy_pos_t &pos, const float inset=0) {
     return position_is_reachable(pos.x, pos.y, inset);
   }
+
+  #if IS_SCARA
+    inline bool position_is_reachable_degrees(const int8_t delta_a, const int8_t delta_b, const float inset=0) {
+          return (
+            WITHIN(delta_a, PHI_MIN, PHI_MAX) && WITHIN(delta_b, PHI_MIN+PSI_MIN, PHI_MAX+PSI_MAX)
+          );
+
+      }
+
+    inline bool position_is_reachable_degrees(const ab_pos_t &pos, const float inset=0) {
+      return position_is_reachable_degrees(pos.a, pos.b, inset);
+    }
+  #endif
 
 #else // CARTESIAN
 

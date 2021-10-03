@@ -917,12 +917,20 @@ private:
     static void M360();
   #endif
 
-  #if ENABLED(MORGAN_SCARA, MP_SCARA)
+  #if ENABLED(MORGAN_SCARA)
     static bool M360();
     static bool M361();
     static bool M362();
     static bool M363();
     static bool M364();
+  #endif
+
+    #if ENABLED(MP_SCARA)
+    static void M360();
+    static void M361();
+    static void M362();
+    static void M363();
+    static void M364();
   #endif
 
   #if EITHER(EXT_SOLENOID, MANUAL_SOLENOID_CONTROL)

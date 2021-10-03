@@ -491,7 +491,12 @@ void do_blocking_move_to(LINEAR_AXIS_ARGS(const float), const_feedRate_t fr_mm_s
   #endif
 
   #if IS_KINEMATIC
-    if (!position_is_reachable(x, y)) return;
+    if (!position_is_reachable(x, y)) {
+      SERIAL_ECHOLNPGM("Position is outside of machine bounds!");
+      return;
+    }
+    
+     
     destination = current_position;          // sync destination at the start
   #endif
 
@@ -969,7 +974,7 @@ FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
       const float inv_duration = scaled_fr_mm_s / cartesian_segment_mm;
     #endif
 
-    /*
+    ///*
     SERIAL_ECHOPGM("mm=", cartesian_mm);
     SERIAL_ECHOPGM(" seconds=", seconds);
     SERIAL_ECHOPGM(" segments=", segments);
@@ -2088,7 +2093,7 @@ void set_axis_is_at_home(const AxisEnum axis) {
     }
   #endif
 
-  #if EITHER(MORGAN_SCARA, AXEL_TPARA)
+  #if ANY(MORGAN_SCARA, AXEL_TPARA, MP_SCARA)
     scara_set_axis_is_at_home(axis);
   #elif ENABLED(DELTA)
     current_position[axis] = (axis == Z_AXIS) ? DIFF_TERN(HAS_BED_PROBE, delta_height, probe.offset.z) : base_home_pos(axis);

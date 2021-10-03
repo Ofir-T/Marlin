@@ -775,12 +775,20 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 360: M360(); break;                                  // M360: Firmware settings
       #endif
 
-      #if ENABLED(MORGAN_SCARA, MP_SCARA)
+      #if ENABLED(MORGAN_SCARA)
         case 360: if (M360()) return; break;                      // M360: SCARA Theta pos1
         case 361: if (M361()) return; break;                      // M361: SCARA Theta pos2
         case 362: if (M362()) return; break;                      // M362: SCARA Psi pos1
         case 363: if (M363()) return; break;                      // M363: SCARA Psi pos2
         case 364: if (M364()) return; break;                      // M364: SCARA Psi pos3 (90 deg to Theta)
+      #endif
+
+      #if ENABLED(MP_SCARA)                                       //@OfirT:
+        case 360: M360(); break;                                  // M360: SCARA ( T , P ) = ( 0 , 0 ) L1: -> L2: ->
+        case 361: M361(); break;                                  // M361: SCARA ( T , P ) = ( 90 , 0 ) L1: | L2: ->
+        case 362: M362(); break;                                  // M362: SCARA ( T , P ) = ( 0 , 90 ) L1: -> L2: |
+        case 363: M363(); break;                                  // M363: SCARA ( T , P ) = ( 180 , 0 )  L1: <- L2: |
+        case 364: M364(); break;                                  // M364: SCARA ( T , P ) = ( 180 , 90 )  L1: <- L2: <-
       #endif
 
       #if EITHER(EXT_SOLENOID, MANUAL_SOLENOID_CONTROL)

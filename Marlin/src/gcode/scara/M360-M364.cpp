@@ -22,6 +22,9 @@
 
 #include "../../inc/MarlinConfig.h"
 
+#define DEBUG_OUT ENABLED(DEBUG_SCARA_KINEMATICS)
+#include "../../core/debug_out.h"
+
 #if ENABLED(MORGAN_SCARA)
 
 #include "../gcode.h"
@@ -77,5 +80,71 @@ bool GcodeSuite::M364() {
   SERIAL_ECHOLNPGM(" Cal: Theta-Psi 90");
   return SCARA_move_to_cal(45, 135);
 }
+#endif //MORGAN_SCARA
 
-#endif // MORGAN_SCARA
+#if ENABLED(MP_SCARA)
+
+#include "../gcode.h"
+#include "../../module/scara.h"
+#include "../../module/motion.h"
+#include "../../MarlinCore.h" // for IsRunning()
+
+inline bool SCARA_move_to_cal(const int8_t delta_a, const int8_t delta_b, const uint8_t fr_mm_s = 20) {
+  if (IsRunning()) {
+    if(!position_is_reachable_degrees(delta_a,delta_b)) {
+      SERIAL_ECHOLNPGM("The requested position is out the machine bounds! Double check your linkage sizes");
+      return false;
+    }
+    forward_kinematics(delta_a, delta_b);
+    do_blocking_move_to_xy(cartes, fr_mm_s);
+    return true;
+  }
+  SERIAL_ECHOLNPGM("The machine is not running");
+  return false;
+}
+
+/**
+ * M360: SCARA calibration: Move to cal-position ThetaA (0 deg calibration)
+ */
+void GcodeSuite::M360() {
+  SERIAL_ECHOLNPGM(" Cal: (P,T) = (0,0)");
+  if (!SCARA_move_to_cal(0, 0)) return;
+  scara_report_positions();
+}
+
+/**
+ * M361: SCARA calibration: Move to cal-position ThetaB (90 deg calibration - steps per degree)
+ */
+void GcodeSuite::M361() {
+  SERIAL_ECHOLNPGM(" Cal: (P,T) = (90,0)");
+  if (!SCARA_move_to_cal(90, 0)) return;
+  scara_report_positions();
+}
+
+/**
+ * M362: SCARA calibration: Move to cal-position PsiA (0 deg calibration)
+ */
+void GcodeSuite::M362() {
+  SERIAL_ECHOLNPGM(" Cal: (P,T) = (0,90)");
+  if (!SCARA_move_to_cal(0, 90)) return;
+  scara_report_positions();
+}
+
+/**
+ * M363: SCARA calibration: Move to cal-position PsiB (90 deg calibration - steps per degree)
+ */
+void GcodeSuite::M363() {
+  SERIAL_ECHOLNPGM(" Cal: (P,T) = (180,0)");
+  if (!SCARA_move_to_cal(180, 0)) return;
+  scara_report_positions();
+}
+
+/**
+ * M364: SCARA calibration: Move to cal-position PsiC (90 deg to Theta calibration position)
+ */
+void GcodeSuite::M364() {
+  SERIAL_ECHOLNPGM(" Cal: (P,T) = (180,90)");
+  if (!SCARA_move_to_cal(180, 90)) return;
+  scara_report_positions();
+}
+#endif //MP_SCARA

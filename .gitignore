@@ -171,5 +171,17 @@ __pycache__
 # Simulation / Native
 eeprom.dat
 imgui.ini
-@OfirT notes
 Marlin/Configuration.h
+Marlin_copy_firmware_eject_drive/usb_eject.py
+@OfirT note.txt
+Marlin_copy_firmware_eject_drive/Marlin_copy_eject_firmware.py
+SCARA_Simulation.xls
+Marlin/src/gcode/scara/Pronterface serial log
+platformio.ini
+platformio.ini
+.gitignore
+platformio.ini
+buildroot/share/fonts/marlin-6x9.bdf
+buildroot/share/fonts/marlin-6x12-1.bdf
+buildroot/share/fonts/marlin-6x12-2.bdf
+buildroot/share/fonts/marlin-6x12-3.bdf

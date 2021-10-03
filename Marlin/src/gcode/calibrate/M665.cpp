@@ -116,7 +116,7 @@
           scara_pole_offset = scara_new_offset;
           current_position.x += (scara_new_offset-scara_pole_offset).x;
           current_position.y += (scara_new_offset-scara_pole_offset).y;
-          //sync_plan_position();
+          sync_plan_position();
         }
      // }
 
@@ -157,6 +157,8 @@
         , SP_P_STR, scara_home_offset.a
         , SP_T_STR, scara_home_offset.b
         , SP_Z_STR, LINEAR_UNIT(scara_home_offset.z)
+        , SP_A_STR, LINEAR_UNIT(scara_pole_offset.x)
+        , SP_B_STR, LINEAR_UNIT(scara_pole_offset.y)
       #endif
     );
   }

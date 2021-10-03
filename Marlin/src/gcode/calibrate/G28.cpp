@@ -226,7 +226,7 @@ void GcodeSuite::G28() {
   #if ENABLED(MARLIN_DEV_MODE)
     if (parser.seen_test('S')) {
       LOOP_LINEAR_AXES(a) set_axis_is_at_home((AxisEnum)a);
-      sync_plan_position();
+      sync_plan_position(); //@OfirT: double sync with scara?
       SERIAL_ECHOLNPGM("Simulated Homing");
       report_current_position();
       return;
@@ -404,6 +404,9 @@ void GcodeSuite::G28() {
 
       #else
 
+        #if ENABLED(MP_SCARA) && DISABLED(HOME_Y_BEFORE_X)
+          DISABLE_AXIS_Y(); // Allow elbow to be dragged around freely during shoulder homing
+        #endif
         homeaxis(X_AXIS);
 
       #endif

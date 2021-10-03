@@ -77,13 +77,15 @@
   #define SCARA_SEGMENTS_PER_SECOND 200
 
   // Length of inner and outer support arms. Measure arm lengths precisely.
-  #define SCARA_LINKAGE_1  89.5    // (mm)
-  #define SCARA_LINKAGE_2 98.5    // (mm)
+  #define SCARA_LINKAGE_1  98.5    // (mm)
+  #define SCARA_LINKAGE_2 89.5    // (mm) dovetail is 3.5mm and mk8 hotend 6mm
+  #define Z_AXIS_LENGTH 250
 
   // SCARA tower offset (position of Tower relative to bed zero position)
   // This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
-  #define SCARA_OFFSET_X    61 //61?      // (mm)
-  #define SCARA_OFFSET_Y    0 //61?       // (mm)
+  // SCARA_OFFSET_X is distance between pole and X axis (ΔY), SCARA_OFFSET_Y is distance between pole and X axis (ΔX)
+  #define SCARA_OFFSET_X    0       // _X_HALF_BED + MIN_R // (mm)
+  #define SCARA_OFFSET_Y    0      // _Y_HALF_BED // (mm)
 
   #if ENABLED(MORGAN_SCARA)
 
@@ -98,7 +100,7 @@
 s
   #elif ENABLED(MP_SCARA)
 /** @OfirT
- * SCARA offsets { T1, T2 }, { X, Y }
+ * SCARA offsets: home- { T1, T2 }, pole- { X, Y }
  *
  * X and Y offset
  *   Measure the distance from the tip of
@@ -130,16 +132,16 @@ s
  * Above View:
  *  A Axis is the shoulder axis (A⊥X,Y)
  *  B Axis is the elbow axis (B⊥X,Y)
- *  Theta1 = ∠YA , Theta2 = ∠AB
+ *  Phi = ∠YA , Theta = ∠AB
  * 
- *            X Axis
+ *            Y Axis
  *              ^
  *              |
  *     +-----------------+
  *     |                 |
  *     |        ^        | 
  *     |        |        | 
- *     |        A1-->    | ---> Y Axis 
+ *     |        A1-->    | ---> X Axis 
  *     |                 | 
  *     |   A4   A2   A3  | 
  *     |                 |
@@ -147,12 +149,21 @@ s
  */
 
     #define DEBUG_SCARA_KINEMATICS
-    //#define SCARA_RIGHT_HANDED // Uncomment if your SCARA is right handed (elbow joint is always to the right of the shoulder joint)
-    #define SCARA_OFFSET_THETA1  2 // degrees, 2 for debugging
-    #define SCARA_OFFSET_THETA2 2 // degrees, 2 for debugging
-    //#define THETA1_MOTION_RANGE 180 //degrees, in construction
-    //#define THETA2_MOTION_RANGE 180 //degrees, in construction
-    #define MIDDLE_DEAD_ZONE_R
+    #define SCARA_HANDEDNESS -1 // -1: right handed 1: left handed scara.
+    #define POLAR_HOMING        // 
+    #define SCARA_OFFSET_PHI  0 // degrees
+    #define SCARA_OFFSET_THETA 0 // degrees
+
+    #define PHI_MIN -45 //degrees, in construction
+    #define PHI_MAX PHI_MIN+180 //degrees, in construction
+    #define PSI_MIN -120
+    #define PSI_MAX 120
+
+    #define MIDDLE_DEAD_ZONE_R 83
+    #define BACK_DEADZONE_WIDTH  75 //SCARA_LINKAGE_1*COS(PHI_MIN)
+    #define R_MIN MIDDLE_DEAD_ZONE_R
+    #define R_MAX (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+    //#define SQUARE_BED_SIZE  FLOOR((2/5) * ( 2*R_MIN + SQRT( 5 * POW(R_MAX,2) - POW(R_MIN,2) ) )) // formula: floor[ {2/5} * {2*r_min + sqrt( 5*r_max^2 - r_min^2 ) } ] bracket shapes are for easyer reading. described in depth in documentation
 
   #endif
 
@@ -873,9 +884,9 @@ s
 // Specify here all the endstop connectors that are connected to any endstop or probe.
 // Almost all printers will be using one per axis. Probes will use one or more of the
 // extra connectors. Leave undefined any used for non-endstop and non-probe purposes.
-#define USE_XMIN_PLUG
-#define USE_YMIN_PLUG
-#define USE_ZMIN_PLUG
+//#define USE_XMIN_PLUG
+//#define USE_YMIN_PLUG
+//#define USE_ZMIN_PLUG
 //#define USE_IMIN_PLUG
 //#define USE_JMIN_PLUG
 //#define USE_KMIN_PLUG
@@ -957,9 +968,9 @@ s
  *          TMC5130, TMC5130_STANDALONE, TMC5160, TMC5160_STANDALONE
  * :['A4988', 'A5984', 'DRV8825', 'LV8729', 'L6470', 'L6474', 'POWERSTEP01', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2160', 'TMC2160_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC2209', 'TMC2209_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE', 'TMC5160', 'TMC5160_STANDALONE']
  */
-#define X_DRIVER_TYPE  A4988
-#define Y_DRIVER_TYPE  A4988
-#define Z_DRIVER_TYPE  A4988
+#define X_DRIVER_TYPE  TMC2209
+#define Y_DRIVER_TYPE  TMC2209
+#define Z_DRIVER_TYPE  TMC2209
 //#define X2_DRIVER_TYPE A4988
 //#define Y2_DRIVER_TYPE A4988
 //#define Z2_DRIVER_TYPE A4988
@@ -968,7 +979,7 @@ s
 //#define I_DRIVER_TYPE  A4988
 //#define J_DRIVER_TYPE  A4988
 //#define K_DRIVER_TYPE  A4988
-#define E0_DRIVER_TYPE A4988
+#define E0_DRIVER_TYPE TMC2209
 //#define E1_DRIVER_TYPE A4988
 //#define E2_DRIVER_TYPE A4988
 //#define E3_DRIVER_TYPE A4988
@@ -1023,7 +1034,7 @@ s
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 500 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 26.67, 26.67, 400, 93 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -1455,7 +1466,7 @@ s
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
-#define X_HOME_DIR -1
+#define X_HOME_DIR 1
 #define Y_HOME_DIR 1
 #define Z_HOME_DIR -1
 //#define I_HOME_DIR -1
@@ -1465,22 +1476,33 @@ s
 // @section machine
 
 // The size of the printable area //@OfirT: add an option for polar bed area? (min_rad, max_rad, angle motion range)
-#define X_BED_SIZE 200
-#define Y_BED_SIZE 200
+#define BED_SHAPE 0 // 0: Square    1: Rectangle    2: Round
+
+#if (BED_SHAPE == 0)
+  #define X_BED_SIZE (148 -(SCARA_OFFSET_X >=0 ? SCARA_OFFSET_X : -SCARA_OFFSET_X)) // cos()
+  #define Y_BED_SIZE (148 -(SCARA_OFFSET_Y >=0 ? SCARA_OFFSET_Y : -SCARA_OFFSET_Y))*2 // sin()
+
+#elif (BED_SHAPE == 1)
+  #define X_BED_SIZE (SCARA_LINKAGE_1+SCARA_LINKAGE_2-(SCARA_OFFSET_X >=0 ? SCARA_OFFSET_X : -SCARA_OFFSET_X)) // cos()
+  #define Y_BED_SIZE (SCARA_LINKAGE_1+SCARA_LINKAGE_2-(SCARA_OFFSET_Y >=0 ? SCARA_OFFSET_Y : -SCARA_OFFSET_Y))*2 // sin()
+
+//#elif (BED_SHAPE == 2)
+
+#endif
 
 // Travel limits (mm) after homing, corresponding to endstop positions. //@OfirT: add polar restrictions
-#define X_MIN_POS -200
-#define Y_MIN_POS -200
-#define Z_MIN_POS 0
-#define X_MAX_POS X_BED_SIZE + 200
-#define Y_MAX_POS Y_BED_SIZE + 200
-#define Z_MAX_POS 200
-//#define I_MIN_POS 0
-//#define I_MAX_POS 50
-//#define J_MIN_POS 0
-//#define J_MAX_POS 50
-//#define K_MIN_POS 0
-//#define K_MAX_POS 50
+  #define X_MIN_POS -(SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+  #define X_MAX_POS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+  #define Y_MIN_POS -(SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+  #define Y_MAX_POS Y_MAX_BED
+  #define Z_MIN_POS 0
+  #define Z_MAX_POS Z_AXIS_LENGTH
+  //#define I_MIN_POS 0
+  //#define I_MAX_POS 50
+  //#define J_MIN_POS 0
+  //#define J_MAX_POS 50
+  //#define K_MIN_POS 0
+  //#define K_MAX_POS 50
 
 /**
  * Software Endstops
@@ -1658,7 +1680,7 @@ s
  * Turn on with the command 'M111 S32'.
  * NOTE: Requires a lot of PROGMEM!
  */
-//#define DEBUG_LEVELING_FEATURE
+#define DEBUG_LEVELING_FEATURE
 
 #if ANY(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL, PROBE_MANUALLY)
   // Set a height for the start of manual adjustment
@@ -1815,7 +1837,7 @@ s
 // @section homing
 
 // The center of the bed is at (X=0, Y=0)
-//#define BED_CENTER_AT_0_0
+#define BED_CENTER_AT_0_0
 
 //@OfirT:
 //Set home position coordinate system. Leave undefined for cartesian.
@@ -1824,13 +1846,15 @@ s
 
 // Manually set the home position. Leave these undefined for automatic settings. //@OfirT: manual home position in polar cooridantes/degrees
 // For DELTA this is the top-center of the Cartesian print volume.
-#if ENABLED(POLAR_HOME_POS)
-  //#define MANUAL_A_HOME_POS 0
-  //#define MANUAL_B_HOME_POS 0
-  //#define MANUAL_C_HOME_POS 0
+#if IS_KINEMATIC
+  #if ENABLED(POLAR_HOME_POS)
+    //#define MANUAL_A_HOME_POS 0
+    //#define MANUAL_B_HOME_POS 0
+    //#define MANUAL_C_HOME_POS 0
+  #endif
 #else
-  #define MANUAL_X_HOME_POS 0
-  #define MANUAL_Y_HOME_POS 0
+  //#define MANUAL_X_HOME_POS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+  //#define MANUAL_Y_HOME_POS 0
 #endif
 //#define MANUAL_Z_HOME_POS 0
 //#define MANUAL_I_HOME_POS 0
@@ -1929,7 +1953,7 @@ s
  *   M501 - Read settings from EEPROM. (i.e., Throw away unsaved changes)
  *   M502 - Revert settings to "factory" defaults. (Follow with M500 to init the EEPROM.)
  */
-//#define EEPROM_SETTINGS     // Persistent storage with M500 and M501
+#define EEPROM_SETTINGS     // Persistent storage with M500 and M501
 //#define DISABLE_M503        // Saves ~2700 bytes of PROGMEM. Disable for release!
 #define EEPROM_CHITCHAT       // Give feedback on EEPROM commands. Disable to save PROGMEM.
 #define EEPROM_BOOT_SILENT    // Keep M503 quiet and only give errors during first load
