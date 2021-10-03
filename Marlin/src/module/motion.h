@@ -496,7 +496,7 @@ void home_if_needed(const bool keeplev=false);
 
   #if HAS_SCARA_OFFSET
     extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
-    extern xy_pos_t scara_pole_offset; // SCARA pole offset: Offset the origin (X=0,Y=0) from Shoulder Axis (Pole). Offsets the entire workspace  
+    extern xy_pos_t scara_offset; // SCARA pole offset: Offset the origin (X=0,Y=0) from Shoulder Axis (Pole). Offsets the entire workspace  
   #endif
 
   // Return true if the given point is within the printable area
@@ -546,7 +546,7 @@ void home_if_needed(const bool keeplev=false);
   #if IS_SCARA
     inline bool position_is_reachable_degrees(const int8_t delta_a, const int8_t delta_b, const float inset=0) {
           return (
-            WITHIN(delta_a, PHI_MIN, PHI_MAX) && WITHIN(delta_b, PHI_MIN+PSI_MIN, PHI_MAX+PSI_MAX)
+            WITHIN(delta_a, PHI_MIN, PHI_MAX) && WITHIN(delta_b, THETA_MIN, THETA_MAX)
           );
 
       }

@@ -1311,7 +1311,6 @@ void setup() {
   #endif
 
   TERN_(HAS_M206_COMMAND, current_position += home_offset); // Init current position based on home_offset
-  //@OfirT: TERN_(IS_SCARA, current_position += scara_pole_offset); // Init current position based on home_offset
 
   sync_plan_position();               // Vital to init stepper/planner equivalent for current_position
 
