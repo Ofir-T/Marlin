@@ -89,7 +89,7 @@ bool GcodeSuite::M364() {
 #include "../../module/motion.h"
 #include "../../MarlinCore.h" // for IsRunning()
 
-inline bool SCARA_move_to_cal(const int8_t delta_a, const int8_t delta_b, const uint8_t fr_mm_s = 20) {
+inline bool SCARA_move_to_cal(const uint8_t delta_a, const uint8_t delta_b, const uint8_t fr_mm_s = 20) {
   if (IsRunning()) {
     if(!position_is_reachable_degrees(delta_a,delta_b)) {
       SERIAL_ECHOLNPGM("The requested position is out the machine bounds! Double check your linkage sizes");

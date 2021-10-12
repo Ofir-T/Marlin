@@ -90,12 +90,12 @@
    *
    * Without NO_WORKSPACE_OFFSETS:
    *
-   *   P[theta-psi-offset]    - Theta-Psi offset, added to the shoulder (A with respect to X) angle
-   *   T[theta-offset]        - Theta     offset, added to the elbow    (B with respect to Y) angle
-   *   Z[z-offset]            - Z offset, added to Z
-   *
-   *   A, P, and X are all aliases for the shoulder angle
-   *   B, T, and Y are all aliases for the elbow angle
+   *   P[phi-offset]          - Phi home position
+   *   T[theta-offset]        - Theta home position
+   *   Z[z-offset]            - Z home position
+   *   X[x-offset]            - X offset from the base of the tower
+   *   Y[y-offset]            - Y offset from the base of the tower
+   *   D[1 or 0]              - Enable/Disable SCARA Debugging mode
    */
   void GcodeSuite::M665() {
     if (!parser.seen_any()) return M665_report();
@@ -104,47 +104,25 @@
 
     #if HAS_SCARA_OFFSET
 
-      //if (parser.seen_test('X') || parser.seen_test('Y')) {
-        xy_pos_t scara_new_offset = scara_pole_offset;
+      if (parser.seen_test('X') || parser.seen_test('Y')) {
+        xy_pos_t scara_new_offset = scara_offset;
 
         // read new offset from parser
-        if (parser.seenval('A')) scara_new_offset.x = parser.value_float();
-        if (parser.seenval('B')) scara_new_offset.y = parser.value_float();
+        if (parser.seenval('X')) scara_new_offset.x = parser.value_float();
+        if (parser.seenval('Y')) scara_new_offset.y = parser.value_float();
 
         // update new origin offset
-        if (scara_new_offset != scara_pole_offset) {
-          scara_pole_offset = scara_new_offset;
-          current_position.x += (scara_new_offset-scara_pole_offset).x;
-          current_position.y += (scara_new_offset-scara_pole_offset).y;
-          sync_plan_position();
+        if (scara_new_offset != scara_offset) {
+          scara_offset = scara_new_offset;
+          current_position.x += (scara_new_offset-scara_offset).x;
+          current_position.y += (scara_new_offset-scara_offset).y;
+          sync_plan_position(); // right place to put it? necessary?
         }
-     // }
+      }
 
       if (parser.seenval('Z')) scara_home_offset.z = parser.value_linear_units();
       if (parser.seenval('P')) scara_home_offset.a = parser.value_float();
       if (parser.seenval('T')) scara_home_offset.b = parser.value_float();
-
-      //const bool hasP = parser.seenval('P');
-      //const uint8_t sumAP = hasA + hasP;
-      //if (sumAP) {
-        //if (sumAP == 1)
-         //scara_home_offset.a = parser.value_float();
-        //else {
-          //SERIAL_ERROR_MSG("Only one of A, P, or X is allowed.");
-          //return;
-        //}
-      //}
-
-      //const bool hasT = parser.seenval('T');
-      //const uint8_t sumBTY = hasB + hasT + hasY;
-      //if (sumBTY) {
-        //if (sumBTY == 1)
-          //scara_home_offset.b = parser.value_float();
-        //else {
-          //SERIAL_ERROR_MSG("Only one of B, T, or Y is allowed.");
-          //return;
-        //}
-      //}
 
     #endif // HAS_SCARA_OFFSET
   }
@@ -157,8 +135,8 @@
         , SP_P_STR, scara_home_offset.a
         , SP_T_STR, scara_home_offset.b
         , SP_Z_STR, LINEAR_UNIT(scara_home_offset.z)
-        , SP_A_STR, LINEAR_UNIT(scara_pole_offset.x)
-        , SP_B_STR, LINEAR_UNIT(scara_pole_offset.y)
+        , SP_A_STR, LINEAR_UNIT(scara_offset.x)
+        , SP_B_STR, LINEAR_UNIT(scara_offset.y)
       #endif
     );
   }

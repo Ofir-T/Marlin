@@ -59,118 +59,6 @@
 
 //===========================================================================
 
-/**
- * MORGAN_SCARA was developed by QHARLEY in South Africa in 2012-2013.
- * Implemented and slightly reworked by JCERNY in June, 2014.
- */
-//#define MORGAN_SCARA
-
-/**
- * Mostly Printed SCARA is an open source design by Tyler Williams. See:
- *   https://www.thingiverse.com/thing:2487048
- *   https://www.thingiverse.com/thing:1241491
- */
-#define MP_SCARA // Serial SCARA Arm
-
-#if EITHER(MORGAN_SCARA, MP_SCARA)
-  // If movement is choppy try lowering this value
-  #define SCARA_SEGMENTS_PER_SECOND 200
-
-  // Length of inner and outer support arms. Measure arm lengths precisely.
-  #define SCARA_LINKAGE_1  98.5    // (mm)
-  #define SCARA_LINKAGE_2 89.5    // (mm) dovetail is 3.5mm and mk8 hotend 6mm
-  #define Z_AXIS_LENGTH 250
-
-  // SCARA tower offset (position of Tower relative to bed zero position)
-  // This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
-  // SCARA_OFFSET_X is distance between pole and X axis (ΔY), SCARA_OFFSET_Y is distance between pole and X axis (ΔX)
-  #define SCARA_OFFSET_X    0       // _X_HALF_BED + MIN_R // (mm)
-  #define SCARA_OFFSET_Y    0      // _Y_HALF_BED // (mm)
-
-  #if ENABLED(MORGAN_SCARA)
-
-    //#define DEBUG_SCARA_KINEMATICS
-    #define SCARA_FEEDRATE_SCALING  // Convert XY feedrate from mm/s to degrees/s on the fly
-
-    // Radius around the center where the arm cannot reach
-    #define MIDDLE_DEAD_ZONE_R   0  // (mm)
-
-    #define THETA_HOMING_OFFSET  0  // Calculated from Calibration Guide and M360 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
-    #define PSI_HOMING_OFFSET    0  // Calculated from Calibration Guide and M364 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
-s
-  #elif ENABLED(MP_SCARA)
-/** @OfirT
- * SCARA offsets: home- { T1, T2 }, pole- { X, Y }
- *
- * X and Y offset
- *   Measure the distance from the tip of
- *   the Nozzle to the center-point of the A Pole (shoulder axis).
- * 
- * T1 and T2 offset
- *   t
- *   t
- *
- * Tune and Adjust
- * -  SCARA Offsets can be tuned at runtime with 'M665', LCD menus, babystepping, etc.
- *
- * Assuming the typical work area orientation:
- *  - Probe to RIGHT of the Nozzle has a Positive X offset
- *  - Probe to LEFT  of the Nozzle has a Negative X offset
- *  - Probe in BACK  of the Nozzle has a Positive Y offset
- *  - Probe in FRONT of the Nozzle has a Negative Y offset
- *
- * Some examples:
- *   #define SCARA_OFFSET_X  0  // Example "A1"
- *   #define SCARA_OFFSET_Y  0
- *   #define SCARA_OFFSET_X  0  // Example "A2"
- *   #define SCARA_OFFSET_Y  0
- *   #define SCARA_OFFSET_X  0  // Example "A3"
- *   #define SCARA_OFFSET_Y  0
- *   #define SCARA_OFFSET_X  0  // Example "A4"
- *   #define SCARA_OFFSET_Y  0
- *
- * Above View:
- *  A Axis is the shoulder axis (A⊥X,Y)
- *  B Axis is the elbow axis (B⊥X,Y)
- *  Phi = ∠YA , Theta = ∠AB
- * 
- *            Y Axis
- *              ^
- *              |
- *     +-----------------+
- *     |                 |
- *     |        ^        | 
- *     |        |        | 
- *     |        A1-->    | ---> X Axis 
- *     |                 | 
- *     |   A4   A2   A3  | 
- *     |                 |
- *     +-----------------+
- */
-
-    #define DEBUG_SCARA_KINEMATICS
-    #define SCARA_HANDEDNESS -1 // -1: right handed 1: left handed scara.
-    #define POLAR_HOMING        // 
-    #define SCARA_OFFSET_PHI  0 // degrees
-    #define SCARA_OFFSET_THETA 0 // degrees
-
-    #define PHI_MIN -45 //degrees, in construction
-    #define PHI_MAX PHI_MIN+180 //degrees, in construction
-    #define PSI_MIN -120
-    #define PSI_MAX 120
-
-    #define MIDDLE_DEAD_ZONE_R 83
-    #define BACK_DEADZONE_WIDTH  75 //SCARA_LINKAGE_1*COS(PHI_MIN)
-    #define R_MIN MIDDLE_DEAD_ZONE_R
-    #define R_MAX (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
-    //#define SQUARE_BED_SIZE  FLOOR((2/5) * ( 2*R_MIN + SQRT( 5 * POW(R_MAX,2) - POW(R_MIN,2) ) )) // formula: floor[ {2/5} * {2*r_min + sqrt( 5*r_max^2 - r_min^2 ) } ] bracket shapes are for easyer reading. described in depth in documentation
-
-  #endif
-
-#endif
-
-//==================== END ==== SCARA Printer ==== END ======================
-
 // @section info
 
 // Author info of this build printed to the host during boot and M115
@@ -248,7 +136,7 @@ s
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
-#define CUSTOM_MACHINE_NAME "SCARA Printer"
+#define CUSTOM_MACHINE_NAME "SCARA"
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -661,7 +549,7 @@ s
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 245
+#define HEATER_0_MAXTEMP 275
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -866,8 +754,6 @@ s
 // Enable for a belt style printer with endless "Z" motion
 //#define BELTPRINTER
 
-// Enable for SCARA Kinematics
-
 // Enable for Polargraph Kinematics
 //#define POLARGRAPH
 #if ENABLED(POLARGRAPH)
@@ -875,7 +761,61 @@ s
   #define POLAR_SEGMENTS_PER_SECOND 5
 #endif
 
-//===========================================================================
+// MORGAN_SCARA was developed by QHARLEY in South Africa in 2012-2013.
+// Implemented and slightly reworked by JCERNY in June, 2014.
+//#define MORGAN_SCARA
+
+// Mostly Printed SCARA is an open source design by Tyler Williams. See:
+//   https://www.thingiverse.com/thing:2487048
+//   https://www.thingiverse.com/thing:1241491
+#define MP_SCARA
+
+#if EITHER(MORGAN_SCARA, MP_SCARA)
+  
+  #define DEBUG_SCARA_KINEMATICS // Sends debug data to the serial port.
+
+  //#define SCARA_FEEDRATE_SCALING  // Convert XY feedrate from mm/s to degrees/s on the fly. required for Morgan SCARA
+  #define SCARA_SEGMENTS_PER_SECOND 200 // If movement is choppy try lowering this value
+
+  // Length of inner and outer support arms. Measure arm lengths precisely. (To the tip of the nozzle)
+  #define SCARA_LINKAGE_1  98.5    // (mm)
+  #define SCARA_LINKAGE_2 89.5    // (mm) dovetail is 3.5mm and mk8 hotend 6mm
+  #define Z_AXIS_LENGTH 250
+
+  // Radius around the center where the arm cannot reach
+  #define MIDDLE_DEAD_ZONE_R 83
+
+  /* SCARA tower offset and home position.
+  *  This needs to be reasonably accurate as it defines the printbed position in the SCARA space.
+  *  For MORGAN SCARA: calculated from Calibration Guide and M360 / M114. See http://reprap.harleystudio.co.za/?page_id=1073
+  *  For MPSCARA: Measured from the base of the arm to the center of the bed. See: <@Ofir-T: put link here>
+  */
+  #define SCARA_OFFSET_X 0 // (mm) { _X_HALF_BED , _Y_HALF_BED + MIN_R }
+  #define SCARA_OFFSET_Y 0 // (mm)
+  #define PHI_HOME_POS   0 // degrees
+  #define THETA_HOME_POS 0 // degrees
+
+  #if ENABLED(MP_SCARA) // Settings that are unique to MPSCARA 
+
+    #define SCARA_HANDEDNESS -1 // -1: right handed 1: left handed SCARA.
+    
+    // Machine's angular motion limits
+    #define PHI_MIN -45 //degrees
+    #define PHI_MAX 180-PHI_MIN //degrees
+    #define THETA_MIN -120
+    #define THETA_MAX 120
+
+    // Width of area behind the tower where the machine cannot reach
+    #define BACK_DEADZONE_WIDTH  75 //SCARA_LINKAGE_1*COS(PHI_MIN)
+    
+    // Calculates the largest square bed the machine can print on, according to the arm's reach.
+    #define R_MIN MIDDLE_DEAD_ZONE_R
+    #define R_MAX (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
+    #define SQUARE_BED_SIZE 148 // FLOOR((2/5) * ( 2*R_MIN + SQRT( 5 * POW(R_MAX,2) - POW(R_MIN,2) ) )) // formula: floor[ {2/5} * {2*r_min + sqrt( 5*r_max^2 - r_min^2 ) } ] bracket shapes are for easyer reading. described in depth in documentation
+
+  #endif
+#endif
+
 //============================== Endstop Settings ===========================
 //===========================================================================
 
@@ -1030,7 +970,7 @@ s
 //#define DISTINCT_E_FACTORS
 
 /**
- * Default Axis Steps Per Unit (steps/mm)
+ * Default Axis Steps Per Unit (steps/mm) (steps/deg for scara)
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
@@ -1475,22 +1415,22 @@ s
 
 // @section machine
 
-// The size of the printable area //@OfirT: add an option for polar bed area? (min_rad, max_rad, angle motion range)
-#define BED_SHAPE 0 // 0: Square    1: Rectangle    2: Round
+// The shape of the printable aread
+#define BED_SHAPE 0 // 0: Square    1: Rectangle    2: Round    3: U-shape
 
 #if (BED_SHAPE == 0)
-  #define X_BED_SIZE (148 -(SCARA_OFFSET_X >=0 ? SCARA_OFFSET_X : -SCARA_OFFSET_X)) // cos()
-  #define Y_BED_SIZE (148 -(SCARA_OFFSET_Y >=0 ? SCARA_OFFSET_Y : -SCARA_OFFSET_Y))*2 // sin()
+  #define X_BED_SIZE (SQUARE_BED_SIZE -ABS(SCARA_OFFSET_X)) // cos()
+  #define Y_BED_SIZE (SQUARE_BED_SIZE -ABS(SCARA_OFFSET_Y))*2 // sin()
 
 #elif (BED_SHAPE == 1)
-  #define X_BED_SIZE (SCARA_LINKAGE_1+SCARA_LINKAGE_2-(SCARA_OFFSET_X >=0 ? SCARA_OFFSET_X : -SCARA_OFFSET_X)) // cos()
-  #define Y_BED_SIZE (SCARA_LINKAGE_1+SCARA_LINKAGE_2-(SCARA_OFFSET_Y >=0 ? SCARA_OFFSET_Y : -SCARA_OFFSET_Y))*2 // sin()
+  #define X_BED_SIZE (SCARA_LINKAGE_1+SCARA_LINKAGE_2-ABS(SCARA_OFFSET_X)) // cos()
+  #define Y_BED_SIZE (SCARA_LINKAGE_1+SCARA_LINKAGE_2-ABS(SCARA_OFFSET_Y))*2 // sin()
 
 //#elif (BED_SHAPE == 2)
 
 #endif
 
-// Travel limits (mm) after homing, corresponding to endstop positions. //@OfirT: add polar restrictions
+// Travel limits (mm) after homing, corresponding to endstop positions.
   #define X_MIN_POS -(SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
   #define X_MAX_POS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
   #define Y_MIN_POS -(SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
@@ -1839,19 +1779,12 @@ s
 // The center of the bed is at (X=0, Y=0)
 #define BED_CENTER_AT_0_0
 
-//@OfirT:
-//Set home position coordinate system. Leave undefined for cartesian.
-//Enables seperating the machine cooridnate system from it's workspace coordinates system 
-//#define POLAR_HOME_POS
-
 // Manually set the home position. Leave these undefined for automatic settings. //@OfirT: manual home position in polar cooridantes/degrees
 // For DELTA this is the top-center of the Cartesian print volume.
-#if IS_KINEMATIC
-  #if ENABLED(POLAR_HOME_POS)
-    //#define MANUAL_A_HOME_POS 0
-    //#define MANUAL_B_HOME_POS 0
-    //#define MANUAL_C_HOME_POS 0
-  #endif
+#if ENABLED(IS_KINEMATIC) //@Ofir-T how to incorporate that???
+  //#define MANUAL_A_HOME_POS 0
+  //#define MANUAL_B_HOME_POS 0
+  //#define MANUAL_C_HOME_POS 0
 #else
   //#define MANUAL_X_HOME_POS (SCARA_LINKAGE_1 + SCARA_LINKAGE_2)
   //#define MANUAL_Y_HOME_POS 0

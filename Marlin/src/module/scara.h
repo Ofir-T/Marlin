@@ -25,6 +25,7 @@
  * scara.h - SCARA-specific functions
  */
 
+#include "../core/types.h" //@OfirT: check if needed (for saving and retreiveing offsets)
 #include "../core/macros.h"
 
 extern float segments_per_second;

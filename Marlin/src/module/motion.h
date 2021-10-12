@@ -495,7 +495,7 @@ void home_if_needed(const bool keeplev=false);
 #if IS_KINEMATIC // (DELTA or SCARA)
 
   #if HAS_SCARA_OFFSET
-    extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
+    extern abc_pos_t scara_home_offset; // A and B deg home positions, Z mm home position
     extern xy_pos_t scara_offset; // SCARA pole offset: Offset the origin (X=0,Y=0) from Shoulder Axis (Pole). Offsets the entire workspace  
   #endif
 
@@ -544,9 +544,9 @@ void home_if_needed(const bool keeplev=false);
   }
 
   #if IS_SCARA
-    inline bool position_is_reachable_degrees(const int8_t delta_a, const int8_t delta_b, const float inset=0) {
+    inline bool position_is_reachable_degrees(const uint8_t delta_a, const uint8_t delta_b, const float inset=0) {
           return (
-            WITHIN(delta_a, PHI_MIN, PHI_MAX) && WITHIN(delta_b, THETA_MIN, THETA_MAX)
+            WITHIN(delta_a, PHI_MIN, PHI_MAX) && WITHIN(delta_b, PSI_MIN, PSI_MAX)
           );
 
       }
@@ -632,4 +632,8 @@ void home_if_needed(const bool keeplev=false);
   struct sensorless_t;
   sensorless_t start_sensorless_homing_per_axis(const AxisEnum axis);
   void end_sensorless_homing_per_axis(const AxisEnum axis, sensorless_t enable_stealth);
+#endif
+
+#if HAS_SCARA_OFFSET
+  void set_scara_home_offset(const AxisEnum axis, const float v);
 #endif

@@ -146,8 +146,8 @@ xyz_pos_t cartes;
   abce_pos_t delta;
 
   #if HAS_SCARA_OFFSET
-    abc_pos_t scara_home_offset;
-    xy_pos_t scara_offset;
+    abc_pos_t scara_home_offset = { SCARA_OFFSET_X , SCARA_OFFSET_Y };
+    xy_pos_t scara_offset = { PHI_HOME_POS , THETA_HOME_POS };
   #endif
 
   #if HAS_SOFTWARE_ENDSTOPS
@@ -2153,5 +2153,12 @@ void set_axis_is_at_home(const AxisEnum axis) {
   void set_home_offset(const AxisEnum axis, const float v) {
     home_offset[axis] = v;
     update_workspace_offset(axis);
+  }
+#endif
+
+#if IS_SCARA
+  // Change the home offset for an axis.
+  void set_scara_home_offset(const AxisEnum axis, const float v) {
+      scara_home_offset[axis] = v;
   }
 #endif
